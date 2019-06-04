@@ -4,17 +4,17 @@ for (let i = 0; i < 2; i++) {
   input.rows = "10";
   input.cols = "20";
   input.className = "input";
-  i === 0 ? (input.id = "Plain") : (input.id = "ASCII");
+  i === 0 ? (input.id = "decoded") : (input.id = "encoded");
   elem.appendChild(input);
 
   let btn = document.createElement("button");
   btn.className = "btn";
   if (i === 0) {
     btn.innerHTML = "Encrypt";
-    btn.id = "Plain";
+    btn.id = "decoded";
   } else {
     btn.innerHTML = "Decrypt";
-    btn.id = "ASCII";
+    btn.id = "encoded";
   }
   elem.appendChild(btn);
 }
@@ -32,47 +32,39 @@ document.body.appendChild(elem);
 
 document.querySelectorAll(".btn").forEach(el => {
   el.addEventListener("click", function(el) {
-    if (this.id == "Plain") {
-      let plain = document.querySelector("#Plain").value;
-      document.querySelector("#ASCII").value = encrypt(plain);
-    } else if (this.id == "ASCII") {
-      let encoded = document.querySelector("#ASCII").value;
-      document.querySelector("#Plain").value = decrypt(encoded);
+    if (this.id == "decoded") {
+      let plain = document.querySelector("#decoded").value;
+      document.querySelector("#encoded").value = caesair("encrypt", plain);
+    } else if (this.id == "encoded") {
+      let encoded = document.querySelector("#encoded").value;
+      document.querySelector("#decoded").value = caesair("decrypt", encoded);
     }
   });
 });
 
-let encrypt = text => {
+let caesair = (fn, text) => {
   let shift = isNaN(parseInt(document.querySelector("input").value))
     ? 0
     : parseInt(document.querySelector("input").value);
   return text
     .split("")
     .map(char => {
-      if (char.charCodeAt(0) + shift > 127) {
-        return char.charCodeAt(0) + shift - 127;
-      } else if (char.charCodeAt(0) + shift < 0) {
-        return char.charCodeAt(0) + shift + 127;
-      } else {
-        return char.charCodeAt(0) + shift;
-      }
-    })
-    .join("-");
-};
-
-let decrypt = text => {
-  let shift = isNaN(parseInt(document.querySelector("input").value))
-    ? 0
-    : parseInt(document.querySelector("input").value);
-  return text
-    .split("-")
-    .map(code => {
-      if (code - shift < 0) {
-        return String.fromCharCode(code - shift + 127);
-      } else if (code - shift > 127) {
-        return String.fromCharCode(code - shift - 127);
-      } else {
-        return String.fromCharCode(code - shift);
+      if (fn == "encrypt") {
+        if (char.charCodeAt(0) + shift > 127) {
+          return String.fromCharCode(char.charCodeAt(0) + shift - 127);
+        } else if (char.charCodeAt(0) + shift < 0) {
+          return String.fromCharCode(char.charCodeAt(0) + shift + 127);
+        } else {
+          return String.fromCharCode(char.charCodeAt(0) + shift);
+        }
+      } else if (fn == "decrypt") {
+        if (char.charCodeAt(0) - shift > 127) {
+          return String.fromCharCode(char.charCodeAt(0) - shift - 127);
+        } else if (char.charCodeAt(0) - shift < 0) {
+          return String.fromCharCode(char.charCodeAt(0) - shift + 127);
+        } else {
+          return String.fromCharCode(char.charCodeAt(0) - shift);
+        }
       }
     })
     .join("");
